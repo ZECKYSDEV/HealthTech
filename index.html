@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuidado Organizado - Home Care</title>
+    <style>
+        :root {
+            --primary: #2d5a27; /* Verde focado em saúde/natureza */
+            --secondary: #f4f7f6;
+            --accent: #e67e22;
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--secondary); margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: auto; }
+        header { text-align: center; margin-bottom: 30px; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        h2 { color: var(--primary); border-bottom: 2px solid var(--secondary); padding-bottom: 10px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, textarea, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        button { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; transition: 0.3s; width: 100%; font-size: 16px; }
+        button:hover { opacity: 0.9; }
+        .badge { background: #eee; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; margin-top: 5px; display: inline-block; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>SISTEMA CUIDADO ORGANIZADO</h1>
+        <p>Central de Registros e Evolução do Paciente</p>
+    </header>
+
+    <div class="card">
+        <h2>Novo Registro de Atendimento</h2>
+        <form id="registroForm">
+            <div class="form-group">
+                <label>Selecione o Paciente</label>
+                <select id="pacienteSelect" required>
+                    <option value="">Carregando pacientes...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>O que foi feito? (Rotina)</label>
+                <textarea id="descricao" rows="3" placeholder="Ex: Banho realizado, medicação das 10h administrada..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>Observações/Evolução</label>
+                <textarea id="evolucao" rows="3" placeholder="Ex: Paciente apresentou melhora no humor, mas pouca aceitação alimentar."></textarea>
+            </div>
+            <button type="submit">Salvar no Histórico</button>
+        </form>
+    </div>
+
+    <div id="listaPacientes"></div>
+</div>
+
+<script>
+    const API_URL = 'http://localhost:3000';
+
+    // 1. Carregar Pacientes para o Select e Lista
+    async function carregarDados() {
+        try {
+            const res = await fetch(`${API_URL}/pacientes`);
+            const pacientes = await res.json();
+            
+            const select = document.getElementById('pacienteSelect');
+            const lista = document.getElementById('listaPacientes');
+            
+            select.innerHTML = '<option value="">Selecione...</option>';
+            lista.innerHTML = '<h2>Seus Pacientes</h2>';
+
+            pacientes.forEach(p => {
+                // Preenche o Select
+                select.innerHTML += `<option value="${p.id}">${p.nome}</option>`;
+                
+                // Cria os Cards de Visualização
+                lista.innerHTML += `
+                    <div class="card">
+                        <h3>${p.nome}</h3>
+                        <p><strong>Histórico Base:</strong> ${p.historico}</p>
+                        <span class="badge">Atendimento Ativo</span>
+                    </div>
+                `;
+            });
+        } catch (err) {
+            console.error("Erro ao conectar com o Backend:", err);
+        }
+    }
+
+    // 2. Salvar Registro no Backend
+    document.getElementById('registroForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const dados = {
+            paciente_id: document.getElementById('pacienteSelect').value,
+            descricao: document.getElementById('descricao').value,
+            evolucao: document.getElementById('evolucao').value
+        };
+
+        const res = await fetch(`${API_URL}/registros`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dados)
+        });
+
+        if (res.ok) {
+            alert('Registro salvo com sucesso! A família já pode visualizar.');
+            document.getElementById('registroForm').reset();
+        }
+    });
+
+    carregarDados();
+</script>

@@ -27,7 +27,9 @@ Bash
 node server.js
 O servidor iniciará na porta 3000 e criará automaticamente 4 pacientes para teste.
 Acessar a Interface: Abra o arquivo index.html em seu navegador ou utilize a extensão Live Server do VS Code.
+
 📁 Estrutura de Arquivos
+
 server.js: Servidor API e lógica de banco de dados.
 index.html: Interface visual para interação com a cuidadora.
 cuidadora.db: Arquivo do banco de dados SQLite gerado automaticamente.
